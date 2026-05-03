@@ -10,6 +10,6 @@ import androidx.compose.ui.Modifier
 @Composable
 fun CustomizeScreen(modifier: Modifier = Modifier) {
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("Customize — coming in task 15")
+        Text("Customize — coming soon")
     }
 }

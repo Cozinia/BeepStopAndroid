@@ -22,6 +22,7 @@ fun ApiRace.toDomain() = Race(
 
 fun ApiDriverStanding.toDomain() = StandingsDriver(
     id = driver.driverId,
+    code = driver.code ?: driver.driverId.take(3).uppercase(),
     name = "${driver.givenName} ${driver.familyName}",
     points = points,
     constructorId = constructors.firstOrNull()?.constructorId.orEmpty()
@@ -47,6 +48,7 @@ fun ApiRace.toEntity(cachedAt: Long) = RaceEntity(
 
 fun ApiDriverStanding.toEntity(cachedAt: Long) = DriverStandingEntity(
     driverId = driver.driverId,
+    code = driver.code ?: driver.driverId.take(3).uppercase(),
     name = "${driver.givenName} ${driver.familyName}",
     points = points,
     constructorId = constructors.firstOrNull()?.constructorId.orEmpty(),
@@ -72,6 +74,7 @@ fun RaceEntity.toDomain() = Race(
 
 fun DriverStandingEntity.toDomain() = StandingsDriver(
     id = driverId,
+    code = code,
     name = name,
     points = points,
     constructorId = constructorId

@@ -4,6 +4,16 @@ An F1 companion app for Android. Shows the 2026 race calendar, constructor and d
 
 ---
 
+## Screenshots
+
+<p align="center">
+  <img src="screenshots/Screenshot_20260503_224900.png" width="270" alt="Race calendar screen" />
+  &nbsp;&nbsp;&nbsp;
+  <img src="screenshots/Screenshot_20260503_225002.png" width="270" alt="Championship standings screen" />
+</p>
+
+---
+
 ## What the app does
 
 | Feature | Description |
@@ -80,11 +90,12 @@ app/src/main/java/com/beepstop/
 ├── ui/
 │   ├── theme/                   # Material 3 color scheme (F1 red accent, dark/light)
 │   ├── components/
-│   │   └── BottomNavBar.kt      # 3-tab nav bar with spring-animated icons
+│   │   ├── BottomNavBar.kt      # 3-tab nav bar with spring-animated icons
+│   │   └── RaceRowItem.kt       # Race card with flag, round badge, NEXT highlight
 │   ├── screen/
-│   │   ├── RacesScreen.kt       # Race calendar (task 12)
-│   │   ├── StandingsScreen.kt   # Standings (task 14)
-│   │   └── CustomizeScreen.kt   # Widget settings (task 15)
+│   │   ├── RacesScreen.kt       # Race calendar with pull-to-refresh
+│   │   ├── StandingsScreen.kt   # Expandable constructor/driver standings
+│   │   └── CustomizeScreen.kt   # Widget settings
 │   └── viewmodel/
 │       ├── RacesViewModel.kt
 │       ├── StandingsViewModel.kt
@@ -99,7 +110,7 @@ app/src/main/java/com/beepstop/
 ## What's done
 
 - [x] Project setup, Gradle dependencies, KSP
-- [x] App icon — adaptive, checkered flag foreground, `#1C1C1E` background
+- [x] App icon — adaptive, helmet foreground, yellow `#FFD700` background
 - [x] Material You theme — F1 red accent, auto light/dark, edge-to-edge
 - [x] Release signing — keystore + env-var credentials
 - [x] Data models — API DTOs, domain models, widget models, mappers
@@ -108,13 +119,7 @@ app/src/main/java/com/beepstop/
 - [x] Repository layer — cache-first, stale fallback, `forceRefresh`
 - [x] ViewModels — StateFlow, `refresh()`, `toggleTeam()`, DataStore-backed customize
 - [x] Bottom navigation — spring-animated 3-tab bar, survives rotation
+- [x] Race calendar — flag icons, round badge, NEXT highlight, pull-to-refresh
+- [x] Race row component — circuit name, local race time, upcoming filter
+- [x] Standings screen — expandable team rows, team color accent, driver codes, pull-to-refresh
 
-## What's next
-
-- [ ] Race calendar screen with NEXT badge and flag icons (task 12–13)
-- [ ] Standings screen with expandable team rows (task 14)
-- [ ] Widget customization screen + color picker (task 15–16, 28)
-- [ ] Three home screen widgets via Glance (tasks 17–19)
-- [ ] WorkManager refresh + team color palette (tasks 20, 24)
-- [ ] Circuit maps, tyre graphics, session logic (tasks 22–23, 27)
-- [ ] Loading skeletons, empty states, accessibility (tasks 29–31)

@@ -1,22 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="108dp"
-    android:height="108dp"
-    android:viewportWidth="108"
-    android:viewportHeight="108">
-    <!--
-        4×4 checkered flag, centered in the 72dp safe zone (18–90dp).
-        Each cell is 18×18dp. White squares follow the standard alternating pattern.
-    -->
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="
-            M18,18h18v18h-18z
-            M54,18h18v18h-18z
-            M36,36h18v18h-18z
-            M72,36h18v18h-18z
-            M18,54h18v18h-18z
-            M54,54h18v18h-18z
-            M36,72h18v18h-18z
-            M72,72h18v18h-18z" />
-</vector>
+<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
+    android:src="@mipmap/ic_launcher_foreground"
+    android:gravity="center" />

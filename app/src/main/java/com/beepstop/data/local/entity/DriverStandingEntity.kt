@@ -6,6 +6,7 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "driver_standings")
 data class DriverStandingEntity(
     @PrimaryKey val driverId: String,
+    val code: String,
     val name: String,
     val points: String,
     val constructorId: String,

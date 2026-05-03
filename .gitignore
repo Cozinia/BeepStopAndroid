@@ -18,3 +18,4 @@ local.properties
 /tasks/
 *.jks
 *.keystore
+CLAUDE.md
