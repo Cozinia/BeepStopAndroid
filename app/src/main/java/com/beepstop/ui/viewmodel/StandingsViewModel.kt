@@ -7,7 +7,6 @@ import com.beepstop.data.model.StandingsTeam
 import com.beepstop.data.repository.StandingsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 
 class StandingsViewModel(private val repository: StandingsRepository) : ViewModel() {
@@ -18,12 +17,13 @@ class StandingsViewModel(private val repository: StandingsRepository) : ViewMode
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error
+
     private val _expandedTeamId = MutableStateFlow<String?>(null)
     val expandedTeamId: StateFlow<String?> = _expandedTeamId
 
-    init {
-        load()
-    }
+    init { load() }
 
     fun toggleTeam(id: String) {
         _expandedTeamId.value = if (_expandedTeamId.value == id) null else id
@@ -34,12 +34,19 @@ class StandingsViewModel(private val repository: StandingsRepository) : ViewMode
     private fun load(forceRefresh: Boolean = false) {
         viewModelScope.launch {
             _isLoading.value = true
-            repository.getConstructorStandings(forceRefresh)
-                .catch { _isLoading.value = false }
-                .collect {
-                    _teams.value = it
-                    _isLoading.value = false
-                }
+            _error.value = null
+            repository.getConstructorStandings(forceRefresh).collect { result ->
+                result.fold(
+                    onSuccess = { teams ->
+                        _teams.value = teams
+                        _isLoading.value = false
+                    },
+                    onFailure = { e ->
+                        _error.value = e.message ?: "Failed to load standings"
+                        _isLoading.value = false
+                    }
+                )
+            }
         }
     }
 
