@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">BeepStop</string>
+    <string name="circuit_widget_description">Next F1 race with circuit map</string>
+    <string name="countdown_widget_description">Countdown to next F1 session</string>
+    <string name="standings_widget_description">F1 championship standings</string>
 </resources>
