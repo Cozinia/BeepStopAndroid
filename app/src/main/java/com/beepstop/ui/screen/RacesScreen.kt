@@ -1,13 +1,11 @@
 package com.beepstop.ui.screen
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -15,10 +13,14 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import com.beepstop.ui.components.EmptyState
+import com.beepstop.ui.components.ErrorState
 import com.beepstop.ui.components.RaceRowItem
+import com.beepstop.ui.components.SkeletonRaceRow
 import com.beepstop.ui.viewmodel.RacesViewModel
 import java.time.LocalDate
 
@@ -30,6 +32,7 @@ fun RacesScreen(
 ) {
     val races by viewModel.races.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val error by viewModel.error.collectAsState()
 
     val today = LocalDate.now()
     val upcomingRaces = races.filter { race ->
@@ -44,15 +47,28 @@ fun RacesScreen(
             modifier = Modifier.fillMaxSize()
         ) {
             when {
+                error != null && upcomingRaces.isEmpty() -> {
+                    ErrorState(
+                        message = "Could not load schedule",
+                        onRetry = { viewModel.refresh() }
+                    )
+                }
                 isLoading && upcomingRaces.isEmpty() -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(5) { SkeletonRaceRow() }
                     }
                 }
                 upcomingRaces.isEmpty() -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text("No upcoming races")
-                    }
+                    EmptyState(
+                        icon = Icons.Default.CalendarMonth,
+                        message = "No upcoming races scheduled",
+                        action = { viewModel.refresh() },
+                        actionLabel = "Retry"
+                    )
                 }
                 else -> {
                     LazyColumn(
