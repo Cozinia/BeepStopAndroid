@@ -9,65 +9,81 @@ import com.beepstop.data.model.StandingsDriver
 import com.beepstop.data.model.StandingsTeam
 import com.beepstop.data.remote.ErgastApiService
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 
 class StandingsRepository(
     private val api: ErgastApiService,
     private val constructorDao: ConstructorDao,
     private val driverDao: DriverDao
 ) {
-    fun getConstructorStandings(forceRefresh: Boolean = false): Flow<List<StandingsTeam>> = flow {
+    fun getConstructorStandings(forceRefresh: Boolean = false): Flow<Result<List<StandingsTeam>>> = flow {
         val cachedConstructors = constructorDao.getAll()
-        val cachedDrivers = driverDao.getAll().map { it.toDomain() }
-
-        if (cachedConstructors.isNotEmpty()) {
-            emit(cachedConstructors.map { it.toDomain(cachedDrivers) })
-        }
 
         val needsRefresh = forceRefresh
             || cachedConstructors.isEmpty()
             || !AppDatabase.isCacheValid(cachedConstructors.first().cachedAt)
 
         if (needsRefresh) {
-            runCatching {
-                val now = System.currentTimeMillis()
-                val apiDrivers = api.getDriverStandings()
-                    .mrData.standingsTable.standingsLists
-                    .firstOrNull()?.driverStandings.orEmpty()
-                val apiConstructors = api.getConstructorStandings()
-                    .mrData.standingsTable.standingsLists
-                    .firstOrNull()?.constructorStandings.orEmpty()
-
-                driverDao.deleteAll()
-                driverDao.insertAll(apiDrivers.map { it.toEntity(now) })
-                constructorDao.deleteAll()
-                constructorDao.insertAll(apiConstructors.map { it.toEntity(now) })
-
-                val drivers = apiDrivers.map { it.toDomain() }
-                emit(apiConstructors.map { it.toDomain(drivers) })
+            try {
+                refreshBoth()
+            } catch (e: Exception) {
+                if (cachedConstructors.isEmpty()) {
+                    emit(Result.failure(e))
+                    return@flow
+                }
             }
         }
+
+        emitAll(
+            combine(constructorDao.observeAll(), driverDao.observeAll()) { constructors, drivers ->
+                val domainDrivers = drivers.map { it.toDomain() }
+                Result.success(constructors.map { it.toDomain(domainDrivers) })
+            }
+        )
     }
 
-    fun getDriverStandings(forceRefresh: Boolean = false): Flow<List<StandingsDriver>> = flow {
+    fun getDriverStandings(forceRefresh: Boolean = false): Flow<Result<List<StandingsDriver>>> = flow {
         val cached = driverDao.getAll()
-        if (cached.isNotEmpty()) emit(cached.map { it.toDomain() })
 
         val needsRefresh = forceRefresh
             || cached.isEmpty()
             || !AppDatabase.isCacheValid(cached.first().cachedAt)
 
         if (needsRefresh) {
-            runCatching {
+            try {
                 val now = System.currentTimeMillis()
                 val apiDrivers = api.getDriverStandings()
                     .mrData.standingsTable.standingsLists
                     .firstOrNull()?.driverStandings.orEmpty()
-
                 driverDao.deleteAll()
                 driverDao.insertAll(apiDrivers.map { it.toEntity(now) })
-                emit(apiDrivers.map { it.toDomain() })
+            } catch (e: Exception) {
+                if (cached.isEmpty()) {
+                    emit(Result.failure(e))
+                    return@flow
+                }
             }
         }
+
+        emitAll(driverDao.observeAll().map { entities ->
+            Result.success(entities.map { it.toDomain() })
+        })
+    }
+
+    private suspend fun refreshBoth() {
+        val now = System.currentTimeMillis()
+        val apiDrivers = api.getDriverStandings()
+            .mrData.standingsTable.standingsLists
+            .firstOrNull()?.driverStandings.orEmpty()
+        val apiConstructors = api.getConstructorStandings()
+            .mrData.standingsTable.standingsLists
+            .firstOrNull()?.constructorStandings.orEmpty()
+        driverDao.deleteAll()
+        driverDao.insertAll(apiDrivers.map { it.toEntity(now) })
+        constructorDao.deleteAll()
+        constructorDao.insertAll(apiConstructors.map { it.toEntity(now) })
     }
 }
