@@ -26,7 +26,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -47,6 +47,9 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.beepstop.data.model.StandingsDriver
 import com.beepstop.data.model.StandingsTeam
+import com.beepstop.ui.components.EmptyState
+import com.beepstop.ui.components.ErrorState
+import com.beepstop.ui.components.SkeletonTeamRow
 import com.beepstop.ui.viewmodel.StandingsViewModel
 
 private val teamColors = mapOf(
@@ -64,11 +67,9 @@ private val teamColors = mapOf(
     "rb" to Color(0xFF6692FF),
 )
 
-// Teams whose logos are white-on-transparent and need a colored tile background to be visible
 private val whiteLogoTeams = setOf("red_bull", "aston_martin", "audi", "cadillac")
 
 private fun teamLogoUrl(constructorId: String): String {
-    // Newer/rebranded teams live under /common/f1/2026/{slug}/ — not the 2018-redesign-assets
     val newCdnBase = "https://media.formula1.com/image/upload/f_auto,c_limit,q_auto,w_180"
     return when (constructorId) {
         "red_bull" -> "$newCdnBase/common/f1/2026/redbullracing/2026redbullracinglogowhite.webp"
@@ -90,6 +91,7 @@ fun StandingsScreen(
 ) {
     val teams by viewModel.teams.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val error by viewModel.error.collectAsState()
     val expandedTeamId by viewModel.expandedTeamId.collectAsState()
 
     Column(modifier = modifier.fillMaxSize()) {
@@ -99,22 +101,43 @@ fun StandingsScreen(
             onRefresh = { viewModel.refresh() },
             modifier = Modifier.fillMaxSize()
         ) {
-            if (isLoading && teams.isEmpty()) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
+            when {
+                error != null && teams.isEmpty() -> {
+                    ErrorState(
+                        message = "Could not load standings",
+                        onRetry = { viewModel.refresh() }
+                    )
                 }
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(teams, key = { it.id }) { team ->
-                        TeamSection(
-                            team = team,
-                            expanded = expandedTeamId == team.id,
-                            onToggle = { viewModel.toggleTeam(team.id) }
-                        )
+                isLoading && teams.isEmpty() -> {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(5) { SkeletonTeamRow() }
+                    }
+                }
+                teams.isEmpty() -> {
+                    EmptyState(
+                        icon = Icons.Default.EmojiEvents,
+                        message = "Standings unavailable",
+                        action = { viewModel.refresh() },
+                        actionLabel = "Retry"
+                    )
+                }
+                else -> {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(teams, key = { it.id }) { team ->
+                            TeamSection(
+                                team = team,
+                                expanded = expandedTeamId == team.id,
+                                onToggle = { viewModel.toggleTeam(team.id) }
+                            )
+                        }
                     }
                 }
             }
@@ -164,7 +187,7 @@ private fun TeamSection(
                     ) {
                         AsyncImage(
                             model = teamLogoUrl(team.id),
-                            contentDescription = null,
+                            contentDescription = "${team.name} logo",
                             modifier = Modifier
                                 .size(if (needsColoredBg) 32.dp else 40.dp)
                         )

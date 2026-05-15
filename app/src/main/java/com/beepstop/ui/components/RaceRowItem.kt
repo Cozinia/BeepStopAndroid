@@ -19,6 +19,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -30,112 +32,42 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 private val flagMap = mapOf(
-    // Bahrain
-    "bahrain" to "🇧🇭",
-    "bahrain_outer" to "🇧🇭",
-    // Saudi Arabia
+    "bahrain" to "🇧🇭", "bahrain_outer" to "🇧🇭",
     "jeddah" to "🇸🇦",
-    // Australia
-    "albert_park" to "🇦🇺",
-    "adelaide" to "🇦🇺",
-    // Japan
-    "suzuka" to "🇯🇵",
-    "fuji" to "🇯🇵",
-    // China
+    "albert_park" to "🇦🇺", "adelaide" to "🇦🇺",
+    "suzuka" to "🇯🇵", "fuji" to "🇯🇵",
     "shanghai" to "🇨🇳",
-    // United States
-    "miami" to "🇺🇸",
-    "americas" to "🇺🇸",
-    "vegas" to "🇺🇸",
-    "indianapolis" to "🇺🇸",
-    "watkins_glen" to "🇺🇸",
-    "long_beach" to "🇺🇸",
-    "caesars_palace" to "🇺🇸",
-    "detroit" to "🇺🇸",
-    "dallas" to "🇺🇸",
-    "phoenix" to "🇺🇸",
-    "sebring" to "🇺🇸",
-    "riverside" to "🇺🇸",
-    // Italy
-    "imola" to "🇮🇹",
-    "monza" to "🇮🇹",
-    "mugello" to "🇮🇹",
-    "pescara" to "🇮🇹",
-    // Monaco
+    "miami" to "🇺🇸", "americas" to "🇺🇸", "vegas" to "🇺🇸", "indianapolis" to "🇺🇸",
+    "watkins_glen" to "🇺🇸", "long_beach" to "🇺🇸", "caesars_palace" to "🇺🇸",
+    "detroit" to "🇺🇸", "dallas" to "🇺🇸", "phoenix" to "🇺🇸", "sebring" to "🇺🇸", "riverside" to "🇺🇸",
+    "imola" to "🇮🇹", "monza" to "🇮🇹", "mugello" to "🇮🇹", "pescara" to "🇮🇹",
     "monaco" to "🇲🇨",
-    // Canada
     "villeneuve" to "🇨🇦",
-    // Spain
-    "catalunya" to "🇪🇸",
-    "jerez" to "🇪🇸",
-    "valencia" to "🇪🇸",
-    "pedralbes" to "🇪🇸",
-    "madrid" to "🇪🇸",
-    // Austria
-    "red_bull_ring" to "🇦🇹",
-    "zeltweg" to "🇦🇹",
-    // Great Britain
-    "silverstone" to "🇬🇧",
-    "brands_hatch" to "🇬🇧",
-    "aintree" to "🇬🇧",
-    "donington" to "🇬🇧",
-    // Hungary
+    "catalunya" to "🇪🇸", "jerez" to "🇪🇸", "valencia" to "🇪🇸", "pedralbes" to "🇪🇸", "madrid" to "🇪🇸",
+    "red_bull_ring" to "🇦🇹", "zeltweg" to "🇦🇹",
+    "silverstone" to "🇬🇧", "brands_hatch" to "🇬🇧", "aintree" to "🇬🇧", "donington" to "🇬🇧",
     "hungaroring" to "🇭🇺",
-    // Belgium
-    "spa" to "🇧🇪",
-    "nivelles" to "🇧🇪",
-    // Netherlands
+    "spa" to "🇧🇪", "nivelles" to "🇧🇪",
     "zandvoort" to "🇳🇱",
-    // Azerbaijan
     "baku" to "🇦🇿",
-    // Singapore
     "marina_bay" to "🇸🇬",
-    // Mexico
     "rodriguez" to "🇲🇽",
-    // Brazil
-    "interlagos" to "🇧🇷",
-    "jacarepagua" to "🇧🇷",
-    // UAE
+    "interlagos" to "🇧🇷", "jacarepagua" to "🇧🇷",
     "yas_marina" to "🇦🇪",
-    // Qatar
     "losail" to "🇶🇦",
-    // Portugal
-    "portimao" to "🇵🇹",
-    "estoril" to "🇵🇹",
-    "boavista" to "🇵🇹",
-    "monsanto" to "🇵🇹",
-    // Turkey
+    "portimao" to "🇵🇹", "estoril" to "🇵🇹", "boavista" to "🇵🇹", "monsanto" to "🇵🇹",
     "istanbul" to "🇹🇷",
-    // Germany
-    "nurburgring" to "🇩🇪",
-    "hockenheimring" to "🇩🇪",
-    "avus" to "🇩🇪",
-    // France
-    "ricard" to "🇫🇷",
-    "magny_cours" to "🇫🇷",
-    "dijon" to "🇫🇷",
-    "reims" to "🇫🇷",
-    "clermont_ferrand" to "🇫🇷",
-    // Russia
+    "nurburgring" to "🇩🇪", "hockenheimring" to "🇩🇪", "avus" to "🇩🇪",
+    "ricard" to "🇫🇷", "magny_cours" to "🇫🇷", "dijon" to "🇫🇷", "reims" to "🇫🇷", "clermont_ferrand" to "🇫🇷",
     "sochi" to "🇷🇺",
-    // Malaysia
     "sepang" to "🇲🇾",
-    // South Korea
     "yeongam" to "🇰🇷",
-    // India
     "buddh" to "🇮🇳",
-    // Vietnam
     "hanoi" to "🇻🇳",
-    // South Africa
     "kyalami" to "🇿🇦",
-    // Morocco
-    "ain-diab" to "🇲🇦",
-    "ain_diab" to "🇲🇦",
-    // Switzerland
+    "ain-diab" to "🇲🇦", "ain_diab" to "🇲🇦",
     "bremgarten" to "🇨🇭",
-    // Argentina
     "buenos_aires" to "🇦🇷",
-    // Sweden
     "anderstorp" to "🇸🇪",
 )
 
@@ -149,7 +81,9 @@ fun RaceRowItem(
     val formattedTime = formatRaceTime(race.date, race.time)
 
     Card(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .semantics { contentDescription = "${race.raceName}, Round ${race.round}, $formattedTime${if (isNext) ", Next race" else ""}" },
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {

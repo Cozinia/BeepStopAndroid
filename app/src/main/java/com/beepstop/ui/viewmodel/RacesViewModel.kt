@@ -7,7 +7,6 @@ import com.beepstop.data.model.Race
 import com.beepstop.data.repository.RaceRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 
 class RacesViewModel(private val repository: RaceRepository) : ViewModel() {
@@ -21,9 +20,7 @@ class RacesViewModel(private val repository: RaceRepository) : ViewModel() {
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
 
-    init {
-        load()
-    }
+    init { load() }
 
     fun refresh() = load(forceRefresh = true)
 
@@ -31,12 +28,18 @@ class RacesViewModel(private val repository: RaceRepository) : ViewModel() {
         viewModelScope.launch {
             _isLoading.value = true
             _error.value = null
-            repository.getRaces(forceRefresh)
-                .catch { _error.value = it.message }
-                .collect {
-                    _races.value = it
-                    _isLoading.value = false
-                }
+            repository.getRaces(forceRefresh).collect { result ->
+                result.fold(
+                    onSuccess = { races ->
+                        _races.value = races
+                        _isLoading.value = false
+                    },
+                    onFailure = { e ->
+                        _error.value = e.message ?: "Failed to load races"
+                        _isLoading.value = false
+                    }
+                )
+            }
         }
     }
 

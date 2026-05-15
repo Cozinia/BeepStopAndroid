@@ -96,4 +96,7 @@ dependencies {
 
     // Async
     implementation(libs.kotlinx.coroutines.android)
+
+    // SVG rendering
+    implementation(libs.androidsvg.aar)
 }

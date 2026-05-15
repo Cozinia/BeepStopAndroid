@@ -13,7 +13,7 @@ import com.beepstop.data.local.entity.RaceEntity
 
 @Database(
     entities = [RaceEntity::class, ConstructorStandingEntity::class, DriverStandingEntity::class],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

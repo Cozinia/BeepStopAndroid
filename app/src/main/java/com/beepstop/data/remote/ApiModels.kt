@@ -7,7 +7,17 @@ data class ApiRace(
     val raceName: String,
     val date: String,
     val time: String?,
-    @SerializedName("Circuit") val circuit: ApiCircuit
+    @SerializedName("Circuit") val circuit: ApiCircuit,
+    @SerializedName("FirstPractice") val firstPractice: ApiSessionTime? = null,
+    @SerializedName("SecondPractice") val secondPractice: ApiSessionTime? = null,
+    @SerializedName("ThirdPractice") val thirdPractice: ApiSessionTime? = null,
+    @SerializedName("Sprint") val sprint: ApiSessionTime? = null,
+    @SerializedName("Qualifying") val qualifying: ApiSessionTime? = null,
+)
+
+data class ApiSessionTime(
+    val date: String,
+    val time: String?
 )
 
 data class ApiCircuit(

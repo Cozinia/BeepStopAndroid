@@ -6,11 +6,12 @@ import com.beepstop.data.local.entity.RaceEntity
 import com.beepstop.data.model.Race
 import com.beepstop.data.model.StandingsDriver
 import com.beepstop.data.model.StandingsTeam
+import com.beepstop.data.remote.ApiCircuit
 import com.beepstop.data.remote.ApiConstructorStanding
 import com.beepstop.data.remote.ApiDriverStanding
 import com.beepstop.data.remote.ApiRace
+import com.beepstop.data.remote.ApiSessionTime
 
-// API → Domain
 fun ApiRace.toDomain() = Race(
     round = round.toIntOrNull() ?: 0,
     raceName = raceName,
@@ -35,7 +36,6 @@ fun ApiConstructorStanding.toDomain(drivers: List<StandingsDriver>) = StandingsT
     drivers = drivers.filter { it.constructorId == constructor.constructorId }
 )
 
-// API → Entity
 fun ApiRace.toEntity(cachedAt: Long) = RaceEntity(
     round = round.toIntOrNull() ?: 0,
     raceName = raceName,
@@ -43,7 +43,17 @@ fun ApiRace.toEntity(cachedAt: Long) = RaceEntity(
     time = time,
     circuitId = circuit.circuitId,
     circuitName = circuit.circuitName,
-    cachedAt = cachedAt
+    cachedAt = cachedAt,
+    fp1Date = firstPractice?.date,
+    fp1Time = firstPractice?.time,
+    fp2Date = secondPractice?.date,
+    fp2Time = secondPractice?.time,
+    fp3Date = thirdPractice?.date,
+    fp3Time = thirdPractice?.time,
+    sprintDate = sprint?.date,
+    sprintTime = sprint?.time,
+    qualifyingDate = qualifying?.date,
+    qualifyingTime = qualifying?.time,
 )
 
 fun ApiDriverStanding.toEntity(cachedAt: Long) = DriverStandingEntity(
@@ -62,7 +72,6 @@ fun ApiConstructorStanding.toEntity(cachedAt: Long) = ConstructorStandingEntity(
     cachedAt = cachedAt
 )
 
-// Entity → Domain
 fun RaceEntity.toDomain() = Race(
     round = round,
     raceName = raceName,
@@ -70,6 +79,19 @@ fun RaceEntity.toDomain() = Race(
     time = time,
     circuitId = circuitId,
     circuitName = circuitName
+)
+
+fun RaceEntity.toApiRace() = ApiRace(
+    round = round.toString(),
+    raceName = raceName,
+    date = date,
+    time = time,
+    circuit = ApiCircuit(circuitId, circuitName),
+    firstPractice = if (fp1Date != null) ApiSessionTime(fp1Date, fp1Time) else null,
+    secondPractice = if (fp2Date != null) ApiSessionTime(fp2Date, fp2Time) else null,
+    thirdPractice = if (fp3Date != null) ApiSessionTime(fp3Date, fp3Time) else null,
+    sprint = if (sprintDate != null) ApiSessionTime(sprintDate, sprintTime) else null,
+    qualifying = if (qualifyingDate != null) ApiSessionTime(qualifyingDate, qualifyingTime) else null,
 )
 
 fun DriverStandingEntity.toDomain() = StandingsDriver(
