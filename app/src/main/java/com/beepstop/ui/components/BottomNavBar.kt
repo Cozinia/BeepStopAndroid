@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -25,6 +26,7 @@ private data class NavTab(val label: String, val icon: ImageVector)
 
 private val tabs = listOf(
     NavTab("Races", Icons.Default.DateRange),
+    NavTab("Drivers", Icons.Default.Person),
     NavTab("Standings", Icons.Default.List),
     NavTab("Customize", Icons.Default.Palette),
 )

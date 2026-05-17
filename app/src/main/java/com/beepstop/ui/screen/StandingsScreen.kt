@@ -67,7 +67,6 @@ private val teamColors = mapOf(
     "rb" to Color(0xFF6692FF),
 )
 
-private val whiteLogoTeams = setOf("red_bull", "aston_martin", "audi", "cadillac")
 
 private fun teamLogoUrl(constructorId: String): String {
     val newCdnBase = "https://media.formula1.com/image/upload/f_auto,c_limit,q_auto,w_180"
@@ -177,19 +176,17 @@ private fun TeamSection(
                         .padding(horizontal = 12.dp, vertical = 10.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    val needsColoredBg = team.id in whiteLogoTeams
                     Box(
                         modifier = Modifier
                             .size(40.dp)
                             .clip(RoundedCornerShape(6.dp))
-                            .background(if (needsColoredBg) teamColor else Color.Transparent),
+                            .background(teamColor),
                         contentAlignment = Alignment.Center
                     ) {
                         AsyncImage(
                             model = teamLogoUrl(team.id),
                             contentDescription = "${team.name} logo",
-                            modifier = Modifier
-                                .size(if (needsColoredBg) 32.dp else 40.dp)
+                            modifier = Modifier.size(32.dp)
                         )
                     }
                     Spacer(modifier = Modifier.width(12.dp))
