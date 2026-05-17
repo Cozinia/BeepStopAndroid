@@ -22,10 +22,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.beepstop.ui.components.BottomNavBar
 import com.beepstop.ui.screen.CustomizeScreen
+import com.beepstop.ui.screen.DriversScreen
 import com.beepstop.ui.screen.RacesScreen
 import com.beepstop.ui.screen.StandingsScreen
 import com.beepstop.ui.theme.BeepStopTheme
 import com.beepstop.ui.viewmodel.CustomizeViewModel
+import com.beepstop.ui.viewmodel.DriverViewModel
 import com.beepstop.ui.viewmodel.RacesViewModel
 import com.beepstop.ui.viewmodel.StandingsViewModel
 
@@ -37,6 +39,10 @@ class MainActivity : ComponentActivity() {
 
     private val standingsViewModel: StandingsViewModel by viewModels {
         StandingsViewModel.factory((application as BeepStopApp).standingsRepository)
+    }
+
+    private val driverViewModel: DriverViewModel by viewModels {
+        DriverViewModel.factory((application as BeepStopApp).standingsRepository)
     }
 
     private val customizeViewModel: CustomizeViewModel by viewModels {
@@ -73,8 +79,9 @@ class MainActivity : ComponentActivity() {
                 ) { innerPadding ->
                     when (selectedTab) {
                         0 -> RacesScreen(viewModel = racesViewModel, modifier = Modifier.padding(innerPadding))
-                        1 -> StandingsScreen(viewModel = standingsViewModel, modifier = Modifier.padding(innerPadding))
-                        2 -> CustomizeScreen(
+                        1 -> DriversScreen(viewModel = driverViewModel, modifier = Modifier.padding(innerPadding))
+                        2 -> StandingsScreen(viewModel = standingsViewModel, modifier = Modifier.padding(innerPadding))
+                        3 -> CustomizeScreen(
                             viewModel = customizeViewModel,
                             snackbarHostState = snackbarHostState,
                             modifier = Modifier.padding(innerPadding)

@@ -11,6 +11,10 @@ An F1 companion app for Android. Shows the 2026 race calendar, constructor and d
   &nbsp;&nbsp;&nbsp;
   <img src="screenshots/standings.jpg" width="220" alt="Championship standings screen" />
   &nbsp;&nbsp;&nbsp;
+  <img src="screenshots/driverStandings.jpg" width="220" alt="Driver standings screen" />
+  &nbsp;&nbsp;&nbsp;
+  <img src="screenshots/driverBio.jpg" width="220" alt="Driver biography screen" />
+  &nbsp;&nbsp;&nbsp;
   <img src="screenshots/customizeNextRace.jpg" width="220" alt="Customize — Circuit Widget" />
   &nbsp;&nbsp;&nbsp;
   <img src="screenshots/widgets.jpg" width="220" alt="Home screen widgets" />
@@ -21,10 +25,35 @@ An F1 companion app for Android. Shows the 2026 race calendar, constructor and d
 ## Features
 
 - Full 2026 race calendar with country flags, round badges, and a NEXT badge on the upcoming race. Times are shown in the device's local timezone.
-- Constructor and driver championship standings. Each constructor row expands to show its drivers with points and team color accents.
+- Constructor championship standings. Each constructor row expands to show its drivers with points and team color accents.
+- Driver championship standings ranked by points, with team color accents, driver headshots, and nationality. Tap any driver to open their biography.
+- Driver biography screen with a hero photo, 2026 points, career championships won, and a live Wikipedia summary.
 - Three home screen widgets: Next Race, Session Countdown, and Standings.
 - Customize screen to pick colors for all widgets and set which session type the countdown targets. Changes apply immediately.
 - All data is cached locally with Room and works fully offline. The cache refreshes in the background via WorkManager — races every 6 hours, standings every hour.
+
+---
+
+## Driver standings
+
+The Drivers tab shows all 2026 grid drivers ranked by championship points. Each row has a left-side team color accent, a circular headshot, the driver's full name, nationality, and their current points total aligned to the right in the team color.
+
+Driver points are fetched from the **Jolpi / Ergast API** (`GET ergast/f1/current/driverstandings/`) and cached in Room with a 1-hour TTL — the same cache used by the constructor standings tab. The list is sorted by points descending directly in the Room query so no client-side sorting is needed.
+
+Headshots are loaded from the **official Formula 1 media CDN** (`media.formula1.com`) using the per-driver asset path (`drivers/{LETTER}/{CODE_FullName}/{code}.png`). Coil handles memory and disk caching (50 MB HTTP cache) so photos are only fetched once and served from disk on subsequent launches.
+
+Tapping any row opens the driver biography screen. The system back button and the top bar arrow both navigate back to the list.
+
+---
+
+## Driver biography
+
+The biography screen opens when a driver row is tapped. It shows:
+
+- **Hero photo** — the same F1 CDN headshot as the list row, displayed full-width in a card with a gradient overlay. The driver's three-letter code appears as a colored badge in the top-left corner, and their name and nationality are overlaid at the bottom.
+- **2026 Points** — pulled from the cached Ergast driver standings, so it always reflects the latest synced value.
+- **Championships** — career World Drivers' Championship titles, stored as static data in the app. This doesn't change mid-season and is not available from the Ergast API.
+- **Biography** — a short extract fetched live from the **Wikipedia REST API** (`GET en.wikipedia.org/api/rest_v1/page/summary/{driver}`). The request is made when the screen opens and the result is kept in memory for the session so navigating back and reopening the same driver doesn't hit the network again. A shimmer skeleton is shown while the fetch is in progress.
 
 ---
 
@@ -83,6 +112,8 @@ A session target dropdown lets you choose which type of session the countdown po
 
 **Team logos** — fetched from the official Formula 1 media CDN (`media.formula1.com`) and cached permanently on disk by the background worker.
 
+**Driver headshots** — fetched from the same Formula 1 media CDN using a per-driver path based on the driver's broadcast code and full name (`drivers/{LETTER}/{CODE_FullName}/{code}.png`). Loaded by Coil with a 50 MB HTTP disk cache so they survive app restarts without re-fetching.
+
 ---
 
 ## Widget limitations
@@ -107,6 +138,12 @@ Home screen widgets on Android have platform constraints that are worth understa
 | `GET ergast/f1/2026.json` | Full race calendar with circuit info and all session times |
 | `GET ergast/f1/current/constructorstandings/` | Current constructor championship standings |
 | `GET ergast/f1/current/driverstandings/` | Current driver championship standings |
+
+**[Wikipedia REST API](https://en.wikipedia.org/api/rest_v1/)** — free, no auth required.
+
+| Endpoint | Used for |
+|---|---|
+| `GET page/summary/{driver}` | Short biography extract shown on the driver biography screen |
 
 ---
 

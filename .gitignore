@@ -8,6 +8,7 @@
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
 /.idea/deploymentTargetSelector.xml
+/.idea/inspectionProfiles/
 .DS_Store
 /build
 /captures
@@ -18,4 +19,3 @@ local.properties
 /tasks/
 *.jks
 *.keystore
-CLAUDE.md
